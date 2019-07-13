@@ -26,7 +26,7 @@ public class ScheduleApplicationTests {
 	}
 	@Test
 	public void contextLoads() throws IOException {
-		File f = new File("d:/a.json");
+		File f = new File("d:/a.json  ");
 		List<MsisdnDto> list = new ArrayList<>();
 		MsisdnDto dto = new MsisdnDto();
 		dto.setMsisdn("17722859084");
