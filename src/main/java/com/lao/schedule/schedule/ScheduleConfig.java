@@ -33,7 +33,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 @Component
 public class ScheduleConfig {
     private static Logger logger = LoggerFactory.getLogger(ScheduleConfig.class);
-    private volatile static List<MsisdnDto> msisdnList = new ArrayList<>();
+    public volatile static List<MsisdnDto> msisdnList = new ArrayList<>();
 
     @Autowired
     private Environment environment;
@@ -87,6 +87,18 @@ public class ScheduleConfig {
     @Scheduled(cron = "${buy5}")
     public void buy5() {
         buyList("5"); //羊
+    }
+
+    @Scheduled(cron = "${findAdopedtListCron}")
+    public void findAdopedtList() {
+        //已经领养的纪录
+        for (MsisdnDto dto : msisdnList) {
+            ((Runnable) () -> {
+                String s = post(environment.getProperty("findAdopedtList"), "{\"pageNo\":1,\"pageSize\":10}", dto.getCookie(), dto.getLuckKey());
+                logger.info("手机号码:{}领养纪录:{}", dto.getMsisdn(), s);
+            }
+            ).run();
+        }
     }
 
     @Scheduled(cron = "${keepLive}")
