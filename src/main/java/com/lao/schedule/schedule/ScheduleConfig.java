@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.NestedRuntimeException;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -12,12 +13,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,8 +58,22 @@ public class ScheduleConfig {
 
     public void readFile() {
         try {
-            String s = StreamUtils.copyToString(new FileInputStream(environment.getProperty("filePath")), Charset.forName("UTF-8"));
-            msisdnList = JSON.parseArray(s, MsisdnDto.class);
+            BufferedReader bf = new BufferedReader(new FileReader(new File(environment.getProperty("filePath"))));
+            List<MsisdnDto> now = new ArrayList<>();
+            while (bf.ready()) {
+                String line = bf.readLine().trim();
+                if (StringUtils.hasText(line)) {
+                    String[] split = line.split("\\|");
+                    MsisdnDto dto1 = new MsisdnDto();
+                    dto1.setMsisdn(split[0]);
+                    dto1.setBuyIds("");
+                    dto1.setCookie("");
+                    dto1.setLuckKey(split[1]);
+                    now.add(dto1);
+                }
+
+            }
+            msisdnList = now;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -89,6 +108,11 @@ public class ScheduleConfig {
         buyList("5"); //羊
     }
 
+    @Scheduled(cron = "${buy18}")
+    public void buy18() {
+        buyList("18"); //牛
+    }
+
     @Scheduled(cron = "${findAdopedtListCron}")
     public void findAdopedtList() {
         //已经领养的纪录
@@ -104,11 +128,17 @@ public class ScheduleConfig {
     @Scheduled(cron = "${keepLive}")
     public void keepLive() {
         readFile();
+        List<MsisdnDto> list = new ArrayList<>();
         for (MsisdnDto dto : msisdnList) {
-            ((Runnable) () ->
-                    logger.info("{}.心跳:{}", dto.getMsisdn(), checkGame(dto.getCookie(), dto.getLuckKey()))
-            ).run();
+            try {
+                String s = checkGame(dto.getCookie(), dto.getLuckKey());
+                logger.info("{}.心跳:{}", dto.getMsisdn(), s);
+                list.add(dto);
+            } catch (NestedRuntimeException e) {
+                logger.error("{}.心跳出错:{}", dto.getMsisdn(), e.getStackTrace()[0]);
+            }
         }
+        msisdnList = list;
     }
 
 

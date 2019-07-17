@@ -32,20 +32,19 @@ public class ScheduleApplicationTests {
 		dto.setMsisdn("17722859084");
 		dto.setBuyIds("");
 		dto.setCookie("");
-		dto.setLuckKey("eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxNzcyMjg1OTA4NCIsImp3dF92YWx1ZSI6IntcImxvZ2luXCI6XCIxNzcyMjg1OTA4NFwiLFwidWlkXCI6XCIxMTQ2OTM2NDIxNzAzNjgwMDAxXCJ9IiwiZXhwIjoxNTYzMTIwNTc0fQ.wFVjCYR0QYy1ndbihcDGaworTwhyJEA8fvw3NQIB7hq8luwAY93vJgxDQZCU8fJ5Mw81eh5lWHdRdAukwqePog");
+		dto.setLuckKey("eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxNzcyMjg1OTA4NCIsImp3dF92YWx1ZSI6IntcImxvZ2luXCI6XCIxNzcyMjg1OTA4NFwiLFwidWlkXCI6XCIxMTQ2OTM2NDIxNzAzNjgwMDAxXCJ9IiwiZXhwIjoxNTYzMTYyMDcyfQ.w_A7AJnRf7SBG52Pjpsw3Uve3AnFtNmzLUHOCdvlW_2KpJyD1gBhv7UEFAYInvL7Eijwn02vGdPLPLHcSDviHg");
 		MsisdnDto dto1 = new MsisdnDto();
 		dto1.setMsisdn("17520089084");
 		dto1.setBuyIds("");
 		dto1.setCookie("");
-		dto1.setLuckKey("eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxNzUyMDA4OTA4NCIsImp3dF92YWx1ZSI6IntcImxvZ2luXCI6XCIxNzUyMDA4OTA4NFwiLFwidWlkXCI6XCIxMTQyMzk2OTkwOTY1NzE5MDQxXCJ9IiwiZXhwIjoxNTYzMTEwNDU2fQ.ErOYxM2DacfdP1-Ua9BffbCQpO7mooe2fnrgCEGHGorzb46cp6Zf9k1AdzGzuIct0OqN-v1M3qFEF1EjhcM3Ag");
+		dto1.setLuckKey("eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxNzUyMDA4OTA4NCIsImp3dF92YWx1ZSI6IntcImxvZ2luXCI6XCIxNzUyMDA4OTA4NFwiLFwidWlkXCI6XCIxMTQyMzk2OTkwOTY1NzE5MDQxXCJ9IiwiZXhwIjoxNTYzMTYyMTMyfQ.ofldtzthmaLRl0ZFJ7NXXbmiqXInNxuMFSG8zUYCXe3JztAG7N2S8TyfBaD3HpL5HIXFSnkqpgDfACa2YNCzkw");
 		MsisdnDto dto12 = new MsisdnDto();
 		dto12.setMsisdn("18148601205");
 		dto12.setBuyIds("");
 		dto12.setCookie("");
-		dto12.setLuckKey("eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxODE0ODYwMTIwNSIsImp3dF92YWx1ZSI6IntcImxvZ2luXCI6XCIxODE0ODYwMTIwNVwiLFwidWlkXCI6XCIxMTM5MDA0NjU5MTk0MDg5NDczXCJ9IiwiZXhwIjoxNTYzMTE5Mzg1fQ.fPJRMl-nySuhwayqOE50fgC5fZa7ftgGzt3oRYgjBDpuZowpccflBfoQYZOUn81X3KXuo94jTQUh_v3XiB549g");
-
+		dto12.setLuckKey("eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxODE0ODYwMTIwNSIsImp3dF92YWx1ZSI6IntcImxvZ2luXCI6XCIxODE0ODYwMTIwNVwiLFwidWlkXCI6XCIxMTM5MDA0NjU5MTk0MDg5NDczXCJ9IiwiZXhwIjoxNTYzMTYyMDI3fQ.ccsEfbllROceIhStUJVU4K7YpmExFew1345O28I0AR5Zwc8iZJmMyIYCQEkagnxfxAhSA0StZr4nzGcblzYFWw");
 		list.add(dto);
-//		list.add(dto1);
+		list.add(dto1);
 		list.add(dto12);
 		FileWriter fw = new FileWriter(f);
 		fw.write(JSON.toJSONString(list));
