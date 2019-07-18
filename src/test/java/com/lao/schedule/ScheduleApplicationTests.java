@@ -1,11 +1,8 @@
 package com.lao.schedule;
 
 import com.alibaba.fastjson.JSON;
-import com.lao.schedule.schedule.MsisdnDto;
-import com.lao.schedule.schedule.ScheduleConfig;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.File;
@@ -20,9 +17,7 @@ public class ScheduleApplicationTests {
 
 	@Test
 	public void test() throws IOException, InterruptedException {
-		(new ScheduleConfig()).keepLive();
-		(new ScheduleConfig()).buy5();
-		Thread.sleep(10000L);
+
 	}
 	@Test
 	public void contextLoads() throws IOException {

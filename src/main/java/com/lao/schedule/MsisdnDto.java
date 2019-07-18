@@ -1,4 +1,4 @@
-package com.lao.schedule.schedule;
+package com.lao.schedule;
 
 import lombok.Data;
 

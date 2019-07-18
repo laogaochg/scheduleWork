@@ -1,6 +1,5 @@
-package com.lao.schedule.schedule;
+package com.lao.schedule;
 
-import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +11,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RequestCallback;
@@ -21,9 +19,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileReader;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -209,7 +205,7 @@ public class ScheduleConfig {
         headers.add("Host", "luck9.singaporeluckyzodiac.com");
         headers.add("Content-Type", "application/json;charset=UTF-8");
         headers.add("Accept", "*/*");
-        headers.add("Accept-Encoding", "gzip, deflate, sdch");
+        headers.add("Accept-Encoding", "UTF-8");
         headers.add("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1");
         return headers;
     }
