@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
@@ -52,28 +53,6 @@ public class ScheduleConfig {
     }
 
 
-    public void readFile() {
-        try {
-            BufferedReader bf = new BufferedReader(new FileReader(new File(environment.getProperty("filePath"))));
-            List<MsisdnDto> now = new ArrayList<>();
-            while (bf.ready()) {
-                String line = bf.readLine().trim();
-                if (StringUtils.hasText(line)) {
-                    String[] split = line.split("\\|");
-                    MsisdnDto dto1 = new MsisdnDto();
-                    dto1.setMsisdn(split[0]);
-                    dto1.setBuyIds("");
-                    dto1.setCookie("");
-                    dto1.setLuckKey(split[1]);
-                    now.add(dto1);
-                }
-
-            }
-            msisdnList = now;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
 
     @Scheduled(cron = "${buy2}")
@@ -123,13 +102,18 @@ public class ScheduleConfig {
 
     @Scheduled(cron = "${keepLive}")
     public void keepLive() {
-        readFile();
+//        readFile();
         List<MsisdnDto> list = new ArrayList<>();
         for (MsisdnDto dto : msisdnList) {
             try {
-                String s = checkGame(dto.getCookie(), dto.getLuckKey());
+                String url = environment.getProperty("checkUrl");
+                String s = post(url, "{}", dto.getCookie(), dto.getLuckKey());
                 logger.info("{}.心跳:{}", dto.getMsisdn(), s);
-                list.add(dto);
+                if (s.contains("\"code\":200")) {
+                    list.add(dto);
+                } else {
+                    logger.error("{}.心跳出错:{}", dto.getMsisdn(), s);
+                }
             } catch (NestedRuntimeException e) {
                 logger.error("{}.心跳出错:{}", dto.getMsisdn(), e.getStackTrace()[0]);
             }
@@ -140,6 +124,8 @@ public class ScheduleConfig {
 
     public void buyList(String id) {
         try {
+            buy(id);
+            Thread.sleep(1000);
             buy(id);
             Thread.sleep(1000);
             buy(id);
@@ -161,8 +147,15 @@ public class ScheduleConfig {
             String url = environment.getProperty("flashBuyUrl") + id;
             String body = "{\"id\":\"" + id + "\"}";
             Runnable r = () -> {
-                String s = String.format("%s 抢 %s 结果：%s", dto.getMsisdn(), animal.get(id), post(url, body, dto.getCookie(), dto.getLuckKey()));
-                BuyResultController.map.put(dto.getMsisdn() + "买了" + animal.get(id), s);
+                String key = dto.getMsisdn() + "买了" + animal.get(id);
+                if(BuyResultController.map.containsKey(key)){
+                    return;
+                }
+                String buy = post(url, body, dto.getCookie(), dto.getLuckKey());
+                String s = String.format("%s 抢 %s 结果：%s", dto.getMsisdn(), animal.get(id), buy);
+                if (s.contains("成功")) {
+                    BuyResultController.map.put(key, s);
+                }
                 logger.info(s);
             };
             executor.execute(r);
@@ -170,14 +163,15 @@ public class ScheduleConfig {
     }
 
 
-    public String checkGame(String cookie, String luckkey) {
-        String url = environment.getProperty("checkUrl");
-        return this.post(url, "{}", cookie, luckkey);
-    }
 
 
     public String post(String url, String body, String cookie, String luckkey) {
-        return (new RestTemplate()).postForObject(url, new HttpEntity(body, this.getHeaders(cookie, luckkey)), String.class, new Object[0]);
+        try {
+            return (new RestTemplate()).postForObject(url, new HttpEntity(body, this.getHeaders(cookie, luckkey)), String.class, new Object[0]);
+        } catch (HttpClientErrorException e) {
+            logger.info("请求出错:{}", e.getResponseBodyAsString());
+            return e.getResponseBodyAsString();
+        }
     }
 
     public String get(String url, String cookie, String luckkey) {

@@ -1,20 +1,12 @@
 package com.lao.schedule;
 
-import java.io.File;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.web.client.RestTemplate;
+import sun.misc.BASE64Encoder;
+
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-
-import com.alibaba.fastjson.JSONObject;
-import com.baidu.aip.util.Base64Util;
-import net.sourceforge.tess4j.Tesseract;
-import net.sourceforge.tess4j.TesseractException;
-import org.springframework.web.client.RestTemplate;
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
 
 /**
  * @author: laogaochg

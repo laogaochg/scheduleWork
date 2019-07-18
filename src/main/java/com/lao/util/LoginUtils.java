@@ -1,20 +1,20 @@
 package com.lao.util;
 
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.alibaba.fastjson.JSON;
 import com.baidu.aip.ocr.AipOcr;
 import com.lao.schedule.MsisdnDto;
 import com.lao.schedule.ScheduleConfig;
+import com.lao.schedule.SpringRefreshListener;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.env.Environment;
 import org.springframework.web.client.RestTemplate;
 import sun.misc.BASE64Decoder;
 
-import static com.lao.schedule.BuyResultController.map;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author: laogaochg
@@ -22,26 +22,33 @@ import static com.lao.schedule.BuyResultController.map;
  */
 public class LoginUtils {
     //设置APPID/AK/SK
+    public static  Environment ENVIRONMENT ;
     public static final String APP_ID = "16837557";
     public static final String API_KEY = "yMLQCTjw7QodPclSEifAkcya";
     public static final String SECRET_KEY = "DGgIN9Q8dL363r0GedrTv4ju6Kq2QK6M";
+    private static Logger logger = LoggerFactory.getLogger(LoginUtils.class);
 
     public static MsisdnDto login(String msisdn) throws Exception {
-        String url = "http://hahauut.singaporeluckyzodiac.com/auth/login";
-        Map<String, Object> map = getCode();
-        map.put("name",msisdn);
-        map.put("password","laogao520");
-        map.put("rememberMe",false);
+        String url = LoginUtils.ENVIRONMENT.getProperty("loginUrl");
+        Map<String, Object> resultMap = new HashMap<>();
+        resultMap.put("count", 0);
+        Map<String, Object> map = getCode(resultMap);
+        map.put("name", msisdn);
+        map.put("password", "laogao520");
+        map.put("rememberMe", false);
+        logger.info("调用百度图片识别接口次数:{}", resultMap.get("count"));
         ScheduleConfig s = new ScheduleConfig();
         String post = s.post(url, JSON.toJSONString(map), null, null);
-        System.out.println(post);
-        if(!post.contains("成功")){
-            login(msisdn);
+        if (!post.contains("成功")) {
+            return login(msisdn);
         }
-        return null;
+        MsisdnDto result = new MsisdnDto();
+        result.setMsisdn(msisdn);
+        result.setLuckKey(JSON.parseObject(post).getString("data"));
+        return result;
     }
 
-    public static Map<String, Object> getCode() throws Exception {
+    public static Map<String, Object> getCode(Map<String, Object> resultMap) throws Exception {
         // 初始化一个AipImageClassifyClient
         AipOcr client = new AipOcr(APP_ID, API_KEY, SECRET_KEY);
         // 可选：设置网络连接参数
@@ -50,23 +57,26 @@ public class LoginUtils {
         // 调用接口
         HashMap<String, String> param = new HashMap<>();
         param.put("with_face", "0");
-        String url = "http://hahauut.singaporeluckyzodiac.com/api/verifyCode/get";
+        String url = LoginUtils.ENVIRONMENT.getProperty("verifyCodeUrl");
         RestTemplate rt = new RestTemplate();
         com.alibaba.fastjson.JSONObject result = rt.getForObject(url, com.alibaba.fastjson.JSONObject.class);
         String s = result.getJSONObject("data").getString("url");
-        Map<String, Object> resultMap = new HashMap<>();
         resultMap.put("verifyCodeToken", result.getJSONObject("data").getString("token"));
+        Integer count = (Integer) resultMap.get("count");
+        if (count > 20) throw new RuntimeException("调用接口超过二十次还是不对");
+        resultMap.put("count", ++count);
         JSONObject res = client.numbers(generateImage(s), param);
-        JSONArray array = res.getJSONArray("words_result");
-        if (array != null && array.length() > 0) {
-            String words = array.getJSONObject(0).getString("words");
-            if (words.length() == 4) {
-                resultMap.put("verifyCode", words);
-                return resultMap;
+        if (res.has("words_result")) {
+            JSONArray array = res.getJSONArray("words_result");
+            if (array != null && array.length() > 0) {
+                String words = array.getJSONObject(0).getString("words");
+                if (words.length() == 4) {
+                    resultMap.put("verifyCode", words);
+                    return resultMap;
+                }
             }
         }
-        getCode();
-        return null;
+        return getCode(resultMap);
     }
 
     public static byte[] generateImage(String imgStr) { // 对字节数组字符串进行Base64解码并生成图片

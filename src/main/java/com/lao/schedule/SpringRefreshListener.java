@@ -1,9 +1,6 @@
 package com.lao.schedule;
 
-import java.io.File;
-
-import net.sourceforge.tess4j.Tesseract;
-import net.sourceforge.tess4j.TesseractException;
+import com.lao.util.LoginUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,19 +29,7 @@ public class SpringRefreshListener implements ApplicationListener<ContextRefresh
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         context = event.getApplicationContext();
-        //验证码图片存储地址
-        File imageFile = new File(environment.getProperty("imgPatch"));
-        Tesseract tessreact = new Tesseract();
-        tessreact.setDatapath(environment.getProperty("dataPatch"));
-        tessreact.setLanguage("eng");//选择字库文件（只需要文件名，不需要后缀名）
-
-        String result;
-        try {
-            result = "测验结果：" + tessreact.doOCR(imageFile);
-            logger.info(result);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        LoginUtils.ENVIRONMENT = environment;
     }
 
 }
