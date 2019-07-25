@@ -66,6 +66,7 @@ public class LoginUtils {
         if (count > 20) throw new RuntimeException("调用接口超过二十次还是不对");
         resultMap.put("count", ++count);
         JSONObject res = client.numbers(generateImage(s), param);
+        System.out.println(res);
         if (res.has("words_result")) {
             JSONArray array = res.getJSONArray("words_result");
             if (array != null && array.length() > 0) {

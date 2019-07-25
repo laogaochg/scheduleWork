@@ -195,8 +195,8 @@ public class ScheduleConfig {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Cookie", cookie);
         headers.add("luckkey", luckkey);
-        headers.add("Referer", "http://luck9.singaporeluckyzodiac.com/");
-        headers.add("Host", "luck9.singaporeluckyzodiac.com");
+        headers.add("Referer", "http://sgkgdmn.singaporeluckyzodiac.com/");
+        headers.add("Host", "sgkgdmn.singaporeluckyzodiac.com");
         headers.add("Content-Type", "application/json;charset=UTF-8");
         headers.add("Accept", "*/*");
         headers.add("Accept-Encoding", "UTF-8");

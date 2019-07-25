@@ -1,11 +1,18 @@
 package com.lao.schedule;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.lao.util.LoginUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -25,12 +32,52 @@ public class BuyResultController {
     private ScheduleConfig scheduleConfig;
     @Autowired
     private Environment environment;
+
     @RequestMapping("/logout")
     public List<MsisdnDto> logout() {
         List<MsisdnDto> msisdnList = ScheduleConfig.msisdnList;
         ScheduleConfig.msisdnList = new ArrayList<>();
         return msisdnList;
     }
+
+    @RequestMapping("/buy")
+    public List<MsisdnDto> buy() {
+        for (String s : ScheduleConfig.animal.keySet()) {
+            scheduleConfig.buyList(s);
+        }
+        return ScheduleConfig.msisdnList;
+    }
+
+    @RequestMapping("/loginB")
+    public List<MsisdnDto> loginB() {
+        readFile();
+        scheduleConfig.keepLive();
+        return ScheduleConfig.msisdnList;
+    }
+
+    public void readFile() {
+        try {
+            BufferedReader bf = new BufferedReader(new FileReader(new File(environment.getProperty("filePath"))));
+            List<MsisdnDto> now = new ArrayList<>();
+            while (bf.ready()) {
+                String line = bf.readLine().trim();
+                if (StringUtils.hasText(line)) {
+                    String[] split = line.split("\\|");
+                    MsisdnDto dto1 = new MsisdnDto();
+                    dto1.setMsisdn(split[0]);
+                    dto1.setBuyIds("");
+                    dto1.setCookie("");
+                    dto1.setLuckKey(split[1]);
+                    now.add(dto1);
+                }
+
+            }
+            ScheduleConfig.msisdnList = now;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     @RequestMapping("/login")
     public List<MsisdnDto> login() {
         List<String> list = new ArrayList<>();
@@ -75,5 +122,20 @@ public class BuyResultController {
             ss.append(dto).append("------").append("\n");
         }
         return ss.toString();
+    }
+
+    @RequestMapping("/totalMoney")
+    public String totalMoney() {
+        BigDecimal totalIncome = new BigDecimal(0);
+        BigDecimal totalAsset = new BigDecimal(0);
+        for (MsisdnDto m : ScheduleConfig.msisdnList) {
+            String s = scheduleConfig.post(environment.getProperty("findUserAssets"), "{}", m.getCookie(), m.getLuckKey());
+            JSONObject jsonObject = JSON.parseObject(s);
+            //收益
+            totalIncome = totalIncome.add(jsonObject.getJSONObject("data").getBigDecimal("totalIncome"));
+            totalAsset = totalAsset.add(jsonObject.getJSONObject("data").getBigDecimal("totalAsset"));
+        }
+        BigDecimal a = totalAsset.subtract(totalIncome);
+        return "资产:" + totalAsset + "，收益:" + totalIncome + "，本金:" + a;
     }
 }
