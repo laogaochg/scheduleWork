@@ -100,7 +100,7 @@ public class ScheduleConfig {
         }
     }
 
-    @Scheduled(cron = "${keepLive}")
+//    @Scheduled(cron = "${keepLive}")
     public void keepLive() {
 //        readFile();
         List<MsisdnDto> list = new ArrayList<>();

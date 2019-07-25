@@ -39,6 +39,18 @@ public class BuyResultController {
         ScheduleConfig.msisdnList = new ArrayList<>();
         return msisdnList;
     }
+    //http://aktt68.sybcsd.cn/api/pigInvitation/invitation/18
+
+    @RequestMapping("/invitation")
+    public String invitation(String id) {
+        String s = "";
+        String url = environment.getProperty("invitationUrl") + id;
+        for (MsisdnDto dto : ScheduleConfig.msisdnList) {
+            s += scheduleConfig.get(url, dto.getCookie(), dto.getLuckKey()) + "<br/>";
+        }
+        return s;
+    }
+
 
     @RequestMapping("/buy")
     public List<MsisdnDto> buy() {
