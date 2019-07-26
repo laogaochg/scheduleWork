@@ -55,18 +55,18 @@ public class ScheduleConfig {
 
 
 
-    @Scheduled(cron = "${buy2}")
+//    @Scheduled(cron = "${buy2}")
     public void buy2() {
         buyList("2");//鸡
     }
 
 
-    @Scheduled(cron = "${buy6}")
+//    @Scheduled(cron = "${buy6}")
     public void buy6() {
         buyList("6"); //猪
     }
 
-    @Scheduled(cron = "${buy17}")
+//    @Scheduled(cron = "${buy17}")
     public void buy17() {
         buyList("17");//马
     }
@@ -83,7 +83,7 @@ public class ScheduleConfig {
         buyList("5"); //羊
     }
 
-    @Scheduled(cron = "${buy18}")
+//    @Scheduled(cron = "${buy18}")
     public void buy18() {
         buyList("18"); //牛
     }

@@ -1,6 +1,7 @@
 package com.lao.schedule;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.lao.util.LoginUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,7 +92,7 @@ public class BuyResultController {
     }
 
     @RequestMapping("/login")
-    public List<MsisdnDto> login() {
+    public String login() {
         List<String> list = new ArrayList<>();
         list.add("18148601205");
         list.add("17722859084");
@@ -113,7 +114,11 @@ public class BuyResultController {
             }
         }
         ScheduleConfig.msisdnList.addAll(result);
-        return ScheduleConfig.msisdnList;
+        String s = "";
+        for (MsisdnDto dto : ScheduleConfig.msisdnList) {
+            s += dto.getMsisdn() + "|" + dto.getLuckKey() + "<br/>";
+        }
+        return s;
     }
 
 
@@ -134,6 +139,52 @@ public class BuyResultController {
             ss.append(dto).append("------").append("\n");
         }
         return ss.toString();
+    }
+
+    @RequestMapping("/toSell")
+    public String toSell() {
+        StringBuilder sb = new StringBuilder();
+        BigDecimal total = new BigDecimal(0);
+        for (MsisdnDto m : ScheduleConfig.msisdnList) {
+            String s = scheduleConfig.post(environment.getProperty("toBeTransferredList"), "{\"pageNo\":1,\"pageSize\":10}", m.getCookie(), m.getLuckKey());
+            if (s.contains("\"code\":200")) {
+                JSONObject jsonObject = JSON.parseObject(s);
+                JSONObject data = jsonObject.getJSONObject("data");
+                if (data != null && data.getJSONArray("records").size() > 0) {
+                    for (Object r : data.getJSONArray("records")) {
+                        JSONObject j = (JSONObject) r;
+                        String goodsName = j.getString("goodsName").replace("幸运", "");
+                        BigDecimal price = j.getBigDecimal("price");
+                        sb.append(m.getMsisdn()).append(" | ").append(goodsName).append(" | ").append(price).append("<br/>");
+                        total = total.add(price);
+                    }
+                }
+
+            }
+        }
+        sb.append("总量:" + total);
+        return sb.toString();
+    }
+    @RequestMapping("/get")
+    public String transferredStatusList() {
+        StringBuilder sb = new StringBuilder();
+        for (MsisdnDto m : ScheduleConfig.msisdnList) {
+            String s = scheduleConfig.post(environment.getProperty("transferredStatusList"), "{\"pageNo\":1,\"pageSize\":10}", m.getCookie(), m.getLuckKey());
+            if (s.contains("\"code\":200")) {
+                JSONObject jsonObject = JSON.parseObject(s);
+                JSONObject data = jsonObject.getJSONObject("data");
+                if (data != null && data.getJSONArray("records").size() > 0) {
+                    for (Object r : data.getJSONArray("records")) {
+                        JSONObject j = (JSONObject) r;
+                        String goodsName = j.getString("goodsName").replace("幸运", "");
+                        BigDecimal price = j.getBigDecimal("pigPrice");
+                        sb.append(m.getMsisdn()).append(" | ").append(goodsName).append(" | ").append(price).append("<br/>");
+                    }
+                }
+
+            }
+        }
+        return sb.toString();
     }
 
     @RequestMapping("/totalMoney")
