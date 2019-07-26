@@ -24,8 +24,7 @@ public class LoginUtils {
     //设置APPID/AK/SK
     public static  Environment ENVIRONMENT ;
     public static final String APP_ID = "16837557";
-    public static final String API_KEY = "yMLQCTjw7QodPclSEifAkcya";
-    public static final String SECRET_KEY = "DGgIN9Q8dL363r0GedrTv4ju6Kq2QK6M";
+
     private static Logger logger = LoggerFactory.getLogger(LoginUtils.class);
 
     public static MsisdnDto login(String msisdn) throws Exception {
@@ -50,6 +49,8 @@ public class LoginUtils {
 
     public static Map<String, Object> getCode(Map<String, Object> resultMap) throws Exception {
         // 初始化一个AipImageClassifyClient
+        String API_KEY = ENVIRONMENT.getProperty("API_KEY");
+        String SECRET_KEY = ENVIRONMENT.getProperty("SECRET_KEY");
         AipOcr client = new AipOcr(APP_ID, API_KEY, SECRET_KEY);
         // 可选：设置网络连接参数
         client.setConnectionTimeoutInMillis(2000);

@@ -23,8 +23,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -36,7 +38,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class ScheduleConfig {
     private static Logger logger = LoggerFactory.getLogger(ScheduleConfig.class);
     public volatile static List<MsisdnDto> msisdnList = new ArrayList<>();
-
+    private final ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(100);
     @Autowired
     private Environment environment;
     public static Map<String, String> animal = new HashMap<>();
@@ -53,20 +55,44 @@ public class ScheduleConfig {
     }
 
 
+    /**
+     * 卖推荐收益
+     */
+    @Scheduled(cron = "${extractCron}")
+    public void extract() throws InterruptedException {
+        String url = environment.getProperty("extract");
+        String s = "{\"account\":\"250\",\"payPassword\":\"laogao530\",\"type\":0,\"typeName\":\"生肖\"}";
+        for (MsisdnDto dto : msisdnList) {
+            executor.execute(() -> {
+                try {
+                    ascyPost(url, s, dto.getMsisdn(), dto.getLuckKey());
+                    Thread.sleep(1000);
+                    ascyPost(url, s, dto.getMsisdn(), dto.getLuckKey());
+                    Thread.sleep(1000);
+                    ascyPost(url, s, dto.getMsisdn(), dto.getLuckKey());
+                    Thread.sleep(5000);
+                    ascyPost(url, s, dto.getMsisdn(), dto.getLuckKey());
+                    Thread.sleep(5000);
+                    ascyPost(url, s, dto.getMsisdn(), dto.getLuckKey());
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
+            });
+        }
+    }
 
-//    @Scheduled(cron = "${buy2}")
     public void buy2() {
         buyList("2");//鸡
     }
 
 
-//    @Scheduled(cron = "${buy6}")
+    //    @Scheduled(cron = "${buy6}")
     public void buy6() {
         buyList("6"); //猪
     }
 
-//    @Scheduled(cron = "${buy17}")
+    //    @Scheduled(cron = "${buy17}")
     public void buy17() {
         buyList("17");//马
     }
@@ -83,7 +109,7 @@ public class ScheduleConfig {
         buyList("5"); //羊
     }
 
-//    @Scheduled(cron = "${buy18}")
+    //    @Scheduled(cron = "${buy18}")
     public void buy18() {
         buyList("18"); //牛
     }
@@ -100,7 +126,7 @@ public class ScheduleConfig {
         }
     }
 
-//    @Scheduled(cron = "${keepLive}")
+    //    @Scheduled(cron = "${keepLive}")
     public void keepLive() {
 //        readFile();
         List<MsisdnDto> list = new ArrayList<>();
@@ -138,8 +164,6 @@ public class ScheduleConfig {
         }
     }
 
-    private final ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(100);
-
 
     private void buy(String id) {
         for (MsisdnDto dto : msisdnList) {
@@ -148,7 +172,7 @@ public class ScheduleConfig {
             String body = "{\"id\":\"" + id + "\"}";
             Runnable r = () -> {
                 String key = dto.getMsisdn() + "买了" + animal.get(id);
-                if(BuyResultController.map.containsKey(key)){
+                if (BuyResultController.map.containsKey(key)) {
                     return;
                 }
                 String buy = post(url, body, dto.getCookie(), dto.getLuckKey());
@@ -162,8 +186,10 @@ public class ScheduleConfig {
         }
     }
 
-
-
+    public String ascyPost(String url, String body, String cookie, String luckkey) {
+        executor.execute(() -> logger.info("卖推荐:{}",post(url, body, cookie, luckkey)));
+        return null;
+    }
 
     public String post(String url, String body, String cookie, String luckkey) {
         try {
