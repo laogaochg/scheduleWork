@@ -1,7 +1,6 @@
 package com.lao.schedule;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.lao.util.LoginUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -33,6 +31,7 @@ public class BuyResultController {
     private ScheduleConfig scheduleConfig;
     @Autowired
     private Environment environment;
+    private static String br = "<br/>";
 
     @RequestMapping("/logout")
     public List<MsisdnDto> logout() {
@@ -47,7 +46,7 @@ public class BuyResultController {
         String s = "";
         String url = environment.getProperty("invitationUrl") + id;
         for (MsisdnDto dto : ScheduleConfig.msisdnList) {
-            s += scheduleConfig.get(url, dto.getCookie(), dto.getLuckKey()) + "<br/>";
+            s += scheduleConfig.get(url, dto.getCookie(), dto.getLuckKey()) + br;
         }
         return s;
     }
@@ -116,18 +115,58 @@ public class BuyResultController {
         ScheduleConfig.msisdnList.addAll(result);
         String s = "";
         for (MsisdnDto dto : ScheduleConfig.msisdnList) {
-            s += dto.getMsisdn() + "|" + dto.getLuckKey() + "<br/>";
+            s += dto.getMsisdn() + "|" + dto.getLuckKey() + br;
         }
         return s;
     }
 
-
+    //已经领养的纪录
     @RequestMapping("/findAdopedtList")
     public String findAdopedtList() {
+        StringBuilder sb = new StringBuilder();
+        for (MsisdnDto dto : ScheduleConfig.msisdnList) {
+            String s = scheduleConfig.post(environment.getProperty("findAdopedtList"), "{\"pageNo\":1,\"pageSize\":10}", dto.getCookie(), dto.getLuckKey());
+            if (s.contains("\"code\":200")) {
+                JSONObject jsonObject = JSON.parseObject(s);
+                JSONObject data = jsonObject.getJSONObject("data");
+                if (data != null && data.getJSONArray("records") != null) {
+                    for (Object r : data.getJSONArray("records")) {
+                        JSONObject j = (JSONObject) r;
+                        String goodsName = j.getString("goodsName").replace("幸运", "");
+                        Integer contractDays = j.getInteger("contractDays");
+//                        2019/07/26 12:44:57
+                        String createTime = j.getString("buyTime").substring(0,10);
+                        String endTime = j.getString("endTime").substring(0,10);
+                        BigDecimal price = j.getBigDecimal("price");
+                        sb.append(dto.getMsisdn())
+                                .append("|").append(goodsName)
+                                .append("|").append(price)
+                                .append("|").append(createTime)
+                                .append("|").append(contractDays)
+                                .append("|").append(endTime)
+                                .append(br);
+                    }
+                }
+
+            }
+        }
+        return sb.toString();
+    }
+
+
+    @RequestMapping("/findAdoptList")
+    public String findAdoptList() {
         StringBuilder ss = new StringBuilder();
         for (MsisdnDto dto : ScheduleConfig.msisdnList) {
             String s = scheduleConfig.post(environment.getProperty("findAdoptList"), "{\"pageNo\":1,\"pageSize\":10}", dto.getCookie(), dto.getLuckKey());
-            ss.append(dto.getMsisdn()).append("-->").append(s).append("\n");
+            if (s.contains("\"code\":200")) {
+                JSONObject jsonObject = JSON.parseObject(s);
+                JSONObject data = jsonObject.getJSONObject("data");
+                if (data != null && data.getJSONArray("records") != null) {
+                    ss.append(dto.getMsisdn()).append("-->").append(data.getJSONArray("records")).append(br);
+                }
+
+            }
         }
         return ss.toString();
     }
@@ -155,7 +194,7 @@ public class BuyResultController {
                         JSONObject j = (JSONObject) r;
                         String goodsName = j.getString("goodsName").replace("幸运", "");
                         BigDecimal price = j.getBigDecimal("price");
-                        sb.append(m.getMsisdn()).append(" | ").append(goodsName).append(" | ").append(price).append("<br/>");
+                        sb.append(m.getMsisdn()).append(" | ").append(goodsName).append(" | ").append(price).append(br);
                         total = total.add(price);
                     }
                 }
@@ -165,6 +204,7 @@ public class BuyResultController {
         sb.append("总量:" + total);
         return sb.toString();
     }
+
     @RequestMapping("/get")
     public String transferredStatusList() {
         StringBuilder sb = new StringBuilder();
@@ -178,7 +218,7 @@ public class BuyResultController {
                         JSONObject j = (JSONObject) r;
                         String goodsName = j.getString("goodsName").replace("幸运", "");
                         BigDecimal price = j.getBigDecimal("pigPrice");
-                        sb.append(m.getMsisdn()).append(" | ").append(goodsName).append(" | ").append(price).append("<br/>");
+                        sb.append(m.getMsisdn()).append(" | ").append(goodsName).append(" | ").append(price).append(br);
                     }
                 }
 

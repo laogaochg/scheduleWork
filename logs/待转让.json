@@ -1,0 +1,49 @@
+{
+  "code": 200,
+  "message": "ok",
+  "data": {
+    "records": [
+      {
+        "id": "1147313496773562369",
+        "createBy": null,
+        "createTime": "2019/07/06 09:17:08",
+        "updateBy": null,
+        "updateTime": "2019/07/26 00:28:34",
+        "delFlag": 0,
+        "version": 2,
+        "userId": "1139004659194089473",
+        "pigId": 17,
+        "orderId": 1151039592368451590,
+        "isAbleSale": "1",
+        "price": 4652.89,
+        "buyTime": "2019/07/16 16:26:20",
+        "buyPrice": 3782.84,
+        "endTime": "2019/07/26 16:26:20",
+        "pigSalt": "Itnd6GvyBYJ1vjM4Q2GuB43m+wz5qUmjuTU5cgPaCru5biYkg5c+TXBAOE4Z8Pj5pwb5avqXXM1YWbsN2u8LGCV+J4iEwscD7OoumMltv60=",
+        "buyType": "userconfim",
+        "fromUserId": 1137382882692366338,
+        "goodsName": "幸运马",
+        "contractDays": 10,
+        "incomeRatio": 23.00,
+        "pigCurrency": 4652.89,
+        "userMobile": "18148601205",
+        "purchaseUserPhone": "13242763229",
+        "appointUserId": null,
+        "auditStatus": null,
+        "appointId": null,
+        "userName": null,
+        "profit": 107.02,
+        "djs": null,
+        "remainingTime": null,
+        "subRatio": 6.89620000,
+        "usdt": 674.7034
+      }
+    ],
+    "total": 1,
+    "size": 10,
+    "current": 1,
+    "searchCount": true,
+    "pages": 1
+  },
+  "succ": true
+}

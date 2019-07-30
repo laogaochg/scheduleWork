@@ -1,0 +1,23 @@
+{
+  "code": 200,
+  "message": "ok",
+  "data": {
+    "userId": 1146936421703680001,
+    "point": 47.00,
+    "money": 118.18,
+    "gtc": 162.40,
+    "lucky": 80.00,
+    "recommendedIncome": 118.18,
+    "totalIncome": 2691.96,
+    "totalAsset": 2307.34,
+    "mobile": 17722859084,
+    "level": 2,
+    "levelName": "普通玩家",
+    "levelNameEn": null,
+    "realName": "伊茗",
+    "cardNum": 3,
+    "nickName": "手机17520089084",
+    "urgentMobile": null
+  },
+  "succ": true
+}

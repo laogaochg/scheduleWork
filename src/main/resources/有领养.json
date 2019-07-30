@@ -1,9 +1,0 @@
-{
-  "code": 200,
-  "message": "ok",
-  "data": {
-    "adoptCount": 1,
-    "transferCount": 0
-  },
-  "succ": true
-}

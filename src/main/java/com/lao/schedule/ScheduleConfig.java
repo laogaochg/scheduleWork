@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
@@ -114,17 +115,7 @@ public class ScheduleConfig {
         buyList("18"); //牛
     }
 
-    @Scheduled(cron = "${findAdopedtListCron}")
-    public void findAdopedtList() {
-        //已经领养的纪录
-        for (MsisdnDto dto : msisdnList) {
-            ((Runnable) () -> {
-                String s = post(environment.getProperty("findAdopedtList"), "{\"pageNo\":1,\"pageSize\":10}", dto.getCookie(), dto.getLuckKey());
-                logger.info("手机号码:{}领养纪录:{}", dto.getMsisdn(), s);
-            }
-            ).run();
-        }
-    }
+
 
     //    @Scheduled(cron = "${keepLive}")
     public void keepLive() {
@@ -141,6 +132,10 @@ public class ScheduleConfig {
                     logger.error("{}.心跳出错:{}", dto.getMsisdn(), s);
                 }
             } catch (NestedRuntimeException e) {
+                //服务器异常的
+                if(e instanceof HttpServerErrorException){
+                    list.add(dto);
+                }
                 logger.error("{}.心跳出错:{}", dto.getMsisdn(), e.getStackTrace()[0]);
             }
         }

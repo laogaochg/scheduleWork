@@ -64,7 +64,7 @@ public class LoginUtils {
         String s = result.getJSONObject("data").getString("url");
         resultMap.put("verifyCodeToken", result.getJSONObject("data").getString("token"));
         Integer count = (Integer) resultMap.get("count");
-        if (count > 20) throw new RuntimeException("调用接口超过二十次还是不对");
+        if (count > 10) throw new RuntimeException("调用接口超过十次还是不对");
         resultMap.put("count", ++count);
         JSONObject res = client.numbers(generateImage(s), param);
         System.out.println(res);
