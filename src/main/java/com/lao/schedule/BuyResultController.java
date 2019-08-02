@@ -54,9 +54,11 @@ public class BuyResultController {
 
     @RequestMapping("/buy")
     public List<MsisdnDto> buy() {
-        for (String s : ScheduleConfig.animal.keySet()) {
-            scheduleConfig.buyList(s);
-        }
+        ScheduleConfig.executor.execute(() -> {
+            for (String s : ScheduleConfig.animal.keySet()) {
+                scheduleConfig.buyList(s);
+            }
+        });
         return ScheduleConfig.msisdnList;
     }
 
@@ -135,8 +137,8 @@ public class BuyResultController {
                         String goodsName = j.getString("goodsName").replace("幸运", "");
                         Integer contractDays = j.getInteger("contractDays");
 //                        2019/07/26 12:44:57
-                        String createTime = j.getString("buyTime").substring(0,10);
-                        String endTime = j.getString("endTime").substring(0,10);
+                        String createTime = j.getString("buyTime").substring(0, 10);
+                        String endTime = j.getString("endTime").substring(0, 10);
                         BigDecimal price = j.getBigDecimal("price");
                         sb.append(dto.getMsisdn())
                                 .append("|").append(goodsName)
@@ -175,7 +177,7 @@ public class BuyResultController {
     public String buyResultKey() {
         StringBuilder ss = new StringBuilder();
         for (String dto : map.keySet()) {
-            ss.append(dto).append("------").append("\n");
+            ss.append(dto).append(br);
         }
         return ss.toString();
     }

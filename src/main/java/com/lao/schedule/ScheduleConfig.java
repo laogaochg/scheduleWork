@@ -9,6 +9,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -22,7 +23,9 @@ import org.springframework.web.client.RestTemplate;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -39,7 +42,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class ScheduleConfig {
     private static Logger logger = LoggerFactory.getLogger(ScheduleConfig.class);
     public volatile static List<MsisdnDto> msisdnList = new ArrayList<>();
-    private final ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(100);
+    public final static ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(100);
     @Autowired
     private Environment environment;
     public static Map<String, String> animal = new HashMap<>();
@@ -83,12 +86,13 @@ public class ScheduleConfig {
         }
     }
 
+    @Scheduled(cron = "${buy2}")
     public void buy2() {
         buyList("2");//鸡
     }
 
 
-    //    @Scheduled(cron = "${buy6}")
+    @Scheduled(cron = "${buy6}")
     public void buy6() {
         buyList("6"); //猪
     }
@@ -116,7 +120,6 @@ public class ScheduleConfig {
     }
 
 
-
     //    @Scheduled(cron = "${keepLive}")
     public void keepLive() {
 //        readFile();
@@ -133,7 +136,7 @@ public class ScheduleConfig {
                 }
             } catch (NestedRuntimeException e) {
                 //服务器异常的
-                if(e instanceof HttpServerErrorException){
+                if (e instanceof HttpServerErrorException) {
                     list.add(dto);
                 }
                 logger.error("{}.心跳出错:{}", dto.getMsisdn(), e.getStackTrace()[0]);
@@ -166,7 +169,8 @@ public class ScheduleConfig {
             String url = environment.getProperty("flashBuyUrl") + id;
             String body = "{\"id\":\"" + id + "\"}";
             Runnable r = () -> {
-                String key = dto.getMsisdn() + "买了" + animal.get(id);
+                SimpleDateFormat sb = new SimpleDateFormat("yyyyMMdd");
+                String key = sb.format(new Date()) + "|" + dto.getMsisdn() + "|" + animal.get(id) + "|成功";
                 if (BuyResultController.map.containsKey(key)) {
                     return;
                 }
@@ -174,6 +178,8 @@ public class ScheduleConfig {
                 String s = String.format("%s 抢 %s 结果：%s", dto.getMsisdn(), animal.get(id), buy);
                 if (s.contains("成功")) {
                     BuyResultController.map.put(key, s);
+                } else if (!s.contains("已经执行开奖了")) {
+                    buy(id);
                 }
                 logger.info(s);
             };
@@ -182,13 +188,19 @@ public class ScheduleConfig {
     }
 
     public String ascyPost(String url, String body, String cookie, String luckkey) {
-        executor.execute(() -> logger.info("卖推荐:{}",post(url, body, cookie, luckkey)));
+        executor.execute(() -> logger.info("卖推荐:{}", post(url, body, cookie, luckkey)));
         return null;
     }
 
     public String post(String url, String body, String cookie, String luckkey) {
         try {
-            return (new RestTemplate()).postForObject(url, new HttpEntity(body, this.getHeaders(cookie, luckkey)), String.class, new Object[0]);
+            RestTemplate template = new RestTemplate();
+            SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+            factory.setConnectTimeout(5000);
+            factory.setReadTimeout(10000);
+            template.setRequestFactory(factory);
+
+            return template.postForObject(url, new HttpEntity(body, this.getHeaders(cookie, luckkey)), String.class, new Object[0]);
         } catch (HttpClientErrorException e) {
             logger.info("请求出错:{}", e.getResponseBodyAsString());
             return e.getResponseBodyAsString();
